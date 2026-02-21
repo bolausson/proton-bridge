@@ -522,6 +522,71 @@ func (s *Connector) MarkMessagesForwarded(ctx context.Context, _ connector.IMAPS
 	return s.client.MarkMessagesUnForwarded(ctx, usertypes.MapTo[imap.MessageID, string](messageIDs)...)
 }
 
+func (s *Connector) MarkMessagesWithGmailLabels(ctx context.Context, _ connector.IMAPStateWrite, messageIDs []imap.MessageID, labels []string, add bool) error {
+	msgIDs := usertypes.MapTo[imap.MessageID, string](messageIDs)
+
+	for _, labelName := range labels {
+		labelID, err := s.resolveGmailLabelID(ctx, labelName, add)
+		if err != nil {
+			return err
+		}
+
+		if labelID == "" {
+			// Label not found and we're removing — skip.
+			continue
+		}
+
+		if add {
+			if err := s.client.LabelMessages(ctx, msgIDs, labelID); err != nil {
+				return fmt.Errorf("failed to label messages with %q: %w", labelName, err)
+			}
+		} else {
+			if err := s.client.UnlabelMessages(ctx, msgIDs, labelID); err != nil {
+				return fmt.Errorf("failed to unlabel messages with %q: %w", labelName, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+// resolveGmailLabelID looks up a Proton label by name. If the label does not exist and add is true,
+// it creates a new label. Returns empty string if the label does not exist and add is false.
+func (s *Connector) resolveGmailLabelID(ctx context.Context, labelName string, create bool) (string, error) {
+	rLabels := s.labels.Read()
+	label, ok := rLabels.GetLabelByName(labelName)
+	rLabels.Close()
+
+	if ok {
+		return label.ID, nil
+	}
+
+	if !create {
+		return "", nil
+	}
+
+	// Auto-create the label.
+	newLabel, err := s.client.CreateLabel(ctx, proton.CreateLabelReq{
+		Name:  labelName,
+		Color: "#f66",
+		Type:  proton.LabelTypeLabel,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to create label %q: %w", labelName, err)
+	}
+
+	wLabels := s.labels.Write()
+	wLabels.SetLabel(newLabel.ID, newLabel, "resolveGmailLabelID")
+	wLabels.Close()
+
+	logrus.WithFields(logrus.Fields{
+		"labelName": labelName,
+		"labelID":   newLabel.ID,
+	}).Info("Auto-created Proton label for X-GM-LABELS")
+
+	return newLabel.ID, nil
+}
+
 func (s *Connector) GetUpdates() <-chan imap.Update {
 	return s.updateCh.GetChannel()
 }
