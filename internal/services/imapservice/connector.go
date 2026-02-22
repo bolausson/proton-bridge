@@ -587,6 +587,27 @@ func (s *Connector) resolveGmailLabelID(ctx context.Context, labelName string, c
 	return newLabel.ID, nil
 }
 
+func (s *Connector) GetGmailLabels(ctx context.Context, messageID imap.MessageID) ([]string, error) {
+	msg, err := s.client.GetMessage(ctx, string(messageID))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get message %v: %w", messageID, err)
+	}
+
+	rLabels := s.labels.Read()
+	defer rLabels.Close()
+
+	var labels []string
+
+	for _, labelID := range msg.LabelIDs {
+		label, ok := rLabels.GetLabel(labelID)
+		if ok && label.Type == proton.LabelTypeLabel {
+			labels = append(labels, label.Name)
+		}
+	}
+
+	return labels, nil
+}
+
 func (s *Connector) GetUpdates() <-chan imap.Update {
 	return s.updateCh.GetChannel()
 }
