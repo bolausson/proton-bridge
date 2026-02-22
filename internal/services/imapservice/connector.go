@@ -608,6 +608,18 @@ func (s *Connector) GetGmailLabels(ctx context.Context, messageID imap.MessageID
 	return labels, nil
 }
 
+func (s *Connector) GetGmailLabelMailboxID(_ context.Context, label string) (imap.MailboxID, bool) {
+	rLabels := s.labels.Read()
+	defer rLabels.Close()
+
+	l, ok := rLabels.GetLabelByName(label)
+	if !ok {
+		return "", false
+	}
+
+	return imap.MailboxID(l.ID), true
+}
+
 func (s *Connector) GetUpdates() <-chan imap.Update {
 	return s.updateCh.GetChannel()
 }
