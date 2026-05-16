@@ -12,7 +12,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/abiosoft/ishell v2.0.0+incompatible
 	github.com/allan-simon/go-singleinstance v0.0.0-20210120080615-d0997106ab37
-	github.com/bradenaw/juniper v0.12.0
+	github.com/bradenaw/juniper v0.15.3
 	github.com/cucumber/godog v0.12.5
 	github.com/cucumber/messages-go/v16 v16.0.1
 	github.com/docker/docker-credential-helpers v0.8.1
@@ -42,16 +42,16 @@ require (
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/pkg/errors v0.9.1
 	github.com/pkg/profile v1.7.0
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v2 v2.24.4
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	go.uber.org/goleak v1.2.1
-	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
+	go.uber.org/goleak v1.3.0
+	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90
 	golang.org/x/net v0.52.0
 	golang.org/x/oauth2 v0.36.0
-	golang.org/x/sys v0.42.0
-	golang.org/x/text v0.35.0
+	golang.org/x/sys v0.43.0
+	golang.org/x/text v0.36.0
 	google.golang.org/api v0.272.0
 	google.golang.org/grpc v1.79.2
 	google.golang.org/protobuf v1.36.11
@@ -110,7 +110,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.21 // indirect
-	github.com/mattn/go-sqlite3 v1.14.37 // indirect
+	github.com/mattn/go-sqlite3 v1.14.42 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6 // indirect
@@ -153,4 +153,8 @@ replace (
 	github.com/go-resty/resty/v2 => github.com/ProtonMail/resty/v2 v2.0.0-20250929142426-e3dc6308c80b
 	github.com/keybase/go-keychain => github.com/ProtonMail/go-keychain v0.0.0-20250929142014-ea8548dff768
 	github.com/keys-pub/go-libfido2 => github.com/ProtonMail/go-libfido2 v0.0.0-20250916110427-df894d6d07a1
+	// Pin x/exp to the version upstream's internal/usertypes expects.
+	// The local gluon replace (which dropped x/exp) lets `go mod tidy`
+	// otherwise float x/exp forward and break slices.SortFunc upstream.
+	golang.org/x/exp => golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 )
