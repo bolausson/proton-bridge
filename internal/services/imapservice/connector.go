@@ -748,7 +748,7 @@ func (s *Connector) MarkMessagesWithGmailLabels(ctx context.Context, _ connector
 				return fmt.Errorf("failed to label messages with %q: %w", labelName, err)
 			}
 		} else {
-			if err := s.client.UnlabelMessages(ctx, msgIDs, labelID); err != nil {
+			if err := s.unlabelMessages(ctx, msgIDs, labelID, "MarkMessagesWithGmailLabels"); err != nil {
 				return fmt.Errorf("failed to unlabel messages with %q: %w", labelName, err)
 			}
 		}
