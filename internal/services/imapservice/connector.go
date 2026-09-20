@@ -729,6 +729,12 @@ func (s *Connector) MarkMessagesForwarded(ctx context.Context, _ connector.IMAPS
 	return s.client.MarkMessagesUnForwarded(ctx, usertypes.MapTo[imap.MessageID, string](messageIDs)...)
 }
 
+// Gluon advertises X-GM-EXT-1 based on the server option alone, then discovers
+// support by type-asserting this optional interface. Without the assertion a
+// renamed or re-signatured method below would silently drop the extension while
+// the capability is still advertised.
+var _ connector.GmailLabelConnector = (*Connector)(nil)
+
 func (s *Connector) MarkMessagesWithGmailLabels(ctx context.Context, _ connector.IMAPStateWrite, messageIDs []imap.MessageID, labels []string, add bool) error {
 	msgIDs := usertypes.MapTo[imap.MessageID, string](messageIDs)
 
